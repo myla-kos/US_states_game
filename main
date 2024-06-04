@@ -1,0 +1,49 @@
+import csv
+import turtle
+import pandas
+from scores import WriteTurtle
+screen = turtle.Screen()
+screen.title("U.S. States Game")
+image = "blank_states_img.gif"
+screen.addshape(image)
+turtle.shape(image)
+writeturtle = WriteTurtle()
+data = pandas.read_csv("50_states.csv")
+guess = data.state.to_list()
+
+correct_guesses = []
+tries = 0
+
+game_on = True
+answer_state = screen.textinput(title="Guess the state", prompt="Enter state name:").title()
+if answer_state in guess:
+    state_info = data[data.state == answer_state]
+    newx = state_info["x"].iloc[0]
+    newy = state_info["y"].iloc[0]
+    position = (newx, newy)
+    writeturtle.addstate(position, answer_state)
+    tries += 1
+    correct_guesses.append(answer_state)
+
+while game_on:
+    new_answer = screen.textinput(title=f"{tries}/50 Correct", prompt="Enter another state name:").title()
+    if new_answer == "Exit":
+        missing_states = [state for state in guess if state not in correct_guesses]
+        new_data = pandas.DataFrame(missing_states)
+        new_data.to_csv("states_to_learn.csv")
+        break
+    if tries == 50:
+        writeturtle.victory()
+        game_on = False
+    if new_answer in guess:
+        correct_guesses.append(new_answer)
+        state_data = data[data.state == new_answer]
+        newx = state_data["x"].iloc[0]
+        newy = state_data["y"].iloc[0]
+        position = (newx, newy)
+        writeturtle.addstate(position, new_answer)
+        tries += 1
+        correct_guesses.append(new_answer)
+
+
+#screen.exitonclick()
